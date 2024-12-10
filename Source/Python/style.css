@@ -1,0 +1,340 @@
+/* Global Styles */
+body {
+    max-width: 902px; /* Largeur utilisable dans Word avec marges standards */
+    margin: 0 auto; /* Centre le contenu horizontalement */
+    padding: 0; /* Pas de marge interne supplémentaire */
+    font-family: 'Arial', sans-serif; /* Police standard Word */
+    line-height: 1.5; /* Espacement de ligne standard dans Word */
+    box-sizing: border-box; /* Garantit que le padding n'ajoute pas à la largeur */
+}
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 250px;
+    height: 100%;
+    background-color: #f4f4f4;
+    padding-top: 20px;
+    padding-left: 10px;
+    overflow-y: auto;
+    border-right: 2px solid #ccc;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar h3 {
+    font-size: 20px;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+/* Sidebar Links */
+.sidebar a {
+    display: block;
+    padding: 10px;
+    text-decoration: none;
+    color: #333;
+    font-size: 12px;
+    margin-bottom: 0px;
+    border-radius: 0px;
+}
+
+.sidebar a:hover {
+    background-color: #ddd;
+}
+
+
+/* Styles généraux de la sidebar */
+.sidebar {
+    width: 300px;
+    padding: 10px;
+    background-color: #f4f4f4;
+    border-right: 2px solid #ccc;
+}
+
+.sidebar a {
+    display: block;
+    color: #007bff;
+    text-decoration: none;
+    padding: 5px;
+    margin-bottom: 5px;
+}
+
+.sidebar a:hover {
+    background-color: #ddd;
+}
+
+/* Ajouter une indentation pour les titres H2 dans la sidebar */
+.sidebar a {
+    padding-left: 0;
+}
+
+.sidebar a[data-target^="h2"] {
+    padding-left: 20px;  /* Indentation pour les titres H2 */
+}
+
+
+
+/* Contenu Principal */
+.content {
+    margin-left: 50px; /* Décalage pour laisser de la place à la sidebar */
+    padding: 20px;
+    background-color: #fff;
+    /* min-height: 100vh; */
+    width:100%;
+}
+
+section {
+
+    display: none;  
+}
+h1 {
+display: none;
+width:100%;
+}
+
+/* Titre */
+h2, h3 {
+    color: #3b7bc0;
+    text-align: center;
+    margin-bottom: 20px;
+    width:100%;
+}
+
+h2 {
+    font-size: 16px;
+}
+
+h3 {
+    font-size: 14px;
+    text-align: left; /* Aligne le texte à gauche */
+    background-color: #3b7bc0; /* Couleur de fond bleue */
+    color: white; /* Couleur du texte */
+    padding: 10px; /* Espacement interne */
+    border-radius: 8px; /* Coins arrondis */
+    margin: 10px 0; /* Espacement externe (haut et bas) */
+    display: block; /* Assure que l'élément prend toute la largeur disponible */
+    width: 100%; /* Assure que l'élément couvre toute la largeur */
+    box-sizing: border-box; /* Inclut le padding dans la largeur totale */
+}
+
+/* Table Styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+}
+
+th, td {
+     padding: 3px 5px; 
+    text-align: left;
+     border: 1px solid #dee2e6; 
+}
+
+th {
+    background-color: #3b7bc0;
+    color: #fff;
+    text-align: center;
+    font-weight: bold;
+}
+
+td {
+    vertical-align: center;
+    font-size: 10px;
+}
+
+tr:nth-child(even) {
+    background-color: #f1f1f1;
+}
+
+/* Highlight Specific Content */
+td b {
+    color: #dc3545; /* Red for emphasis */
+}
+
+/* Details/Notes */
+details {
+    font-size: 0.9rem;
+    background-color: #e9ecef;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    padding: 5px 10px;
+    margin-top: 10px;
+}
+
+details summary {
+    font-weight: bold;
+    cursor: pointer;
+    color: #495057;
+}
+
+/* List and Possible Responses */
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+li {
+    margin: 5px 0;
+}
+
+/* Icon Styling */
+td.center {
+    text-align: center;
+    font-size: 1.2rem;
+}
+
+td .red {
+    color: rgba(255, 0, 0, 0.322);
+}
+
+/* Footnotes and Notes */
+p {
+    margin: 10px 0;
+    font-size: 1rem;
+    color: #6c757d;
+    text-align: center;
+}
+
+code {
+    background-color: #f8f9fa;
+    padding: 3px 5px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 0.9rem;
+}
+
+
+
+/* Cacher les sections avec la classe "hidden" */
+.hidden {
+    /* display: none !important;; Cache complètement l'élément */
+    visibility: hidden  !important; /* L'élément est invisible mais prend de la place */
+}
+
+/* Montrer les sections avec la classe "show" */
+.show {
+    display: block !important;; /* Affiche l'élément en tant que bloc */
+}
+
+  @media print {
+    h1 {
+        page-break-before: always; /* Force un saut de page avant chaque h1 */
+        text-align: center; /* Centre le texte */
+        margin-top: 30%; /* Ajoute un espace avant le h1 pour le centrer verticalement */
+        margin-bottom: 0; /* Enlève la marge inférieure pour éviter de l'espace inutile après le h1 */
+        width:100%;
+    }
+    h2 {
+        page-break-before: always;
+        padding: 0px; /* Espaces internes */
+        margin-bottom: 0px;
+        width:100%;
+    }
+    h3 {
+        padding: 0px; /* Espaces internes */
+        margin-bottom: 0px;
+        width:100%;
+    }
+    section {
+        padding: 0px; /* Espaces internes */
+        margin-bottom: 0px;
+        width:100%;
+    }
+
+    .sidebar {
+        position: fixed; /* La sidebar reste fixe à gauche */
+        top: 0;
+        left: 0;
+        width: 250px;  /* Largeur normale de la sidebar */
+        padding: 0px; /* Espaces internes */
+
+        margin-left: 0mm;
+        box-shadow: none; /* Enlève l'ombre pendant l'impression */
+        border:none;
+        height: 100%;  /* Prend toute la hauteur de la page */
+        padding: 5px;
+        font-size: 10px; /* Réduit la taille de la police pour s'ajuster */
+        line-height: 1.05; /* Réduit l'espacement entre les lignes pour plus de texte */
+        display: block;
+        page-break-inside: avoid; /* Évite que la sidebar soit coupée entre les pages */
+        page-break-before: always; /* Force la sidebar à commencer sur chaque nouvelle page */
+    }
+
+
+    .sidebar a{
+        padding: 0px; /* Espaces internes */
+        margin: -0mm;
+        font-size: 9pt; /* Ajuste la taille de la police pour l'impression */
+    }
+    .sidebar button{
+        display: none !important;; /* Cache complètement l'élément */
+    }
+    .sidebar h3{
+        display: none !important;; /* Cache complètement l'élément */
+    }
+    .content {
+            width: 75%;  /* Largeur normale de la sidebar */
+            padding: 0px; /* Espaces internes */
+            margin-left: 270px;
+            
+    
+        }
+
+    
+    /* Empêcher la coupure de l'élément */
+    body {
+         max-width: 602px; /* Largeur utilisable dans Word avec marges standards */
+         margin-left: 0mm; 
+         font-size: 12pt; /* Ajuste la taille de la police pour l'impression */
+    }
+    .no-break {
+        page-break-inside: avoid;
+        break-inside: avoid; /* Pour les navigateurs modernes */
+    }
+    .no-print {
+        display: none !important;
+    }
+}
+
+#toggle-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+#toggle-button.released {
+    background-color: #6C757D;
+}
+
+/* Par défaut, les éléments sont cachés */
+[data-visual="DM"] {
+    display: table-cell;
+}
+
+.container {
+    display: flex;
+    flex-wrap: wrap; /* Permet aux éléments de se déplacer sur plusieurs lignes si nécessaire */
+}
+
+.column {
+    flex: 1 1 200px; /* Permet à chaque colonne de croître, de rétrécir, et d'avoir une largeur de base de 200px */
+    margin: 10px;
+}
+
+.priority-column {
+    flex: 2 1 200px; /* Cette colonne prend plus d'espace lorsqu'il y en a */
+    
+}
+
+.center-content {
+    text-align: center; /* Centre le contenu horizontalement */
+}
+
+.center-content button {
+    display: inline-block; /* Permet de centrer le bouton */
+}

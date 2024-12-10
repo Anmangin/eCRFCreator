@@ -1,0 +1,86 @@
+{
+
+  "ProPatient" : {
+    "racine": "ProPatient",
+    "keyname": "ProObjectGuid",
+    "fields": ["Caption", "ProFormGuid"]
+  },
+    "ProPatientVisit": {
+      "racine": "ProPatientVisit",
+      "keyname": "ProObjectGuid",
+      "fields": ["ProPatientGuid", "ProVisitGuid", "MinOccurance", "MaxOccurance", "OrderNo"]
+    },
+    "ProVisit": {
+      "racine": "ProVisit",
+      "keyname": "ProObjectGuid",
+      "prefix":"V_",
+      "fields": ["Description","Caption"]
+    },
+    "ProVisitForm": {
+      "racine": "ProVisitForm",
+      "keyname": "ProObjectGuid",
+      "fields": ["ProVisitGuid", "ProFormGuid", "MinOccurance", "MaxOccurance", "OrderNo"]
+    },
+    "ProForm": {
+      "racine": "ProForm",
+      "keyname": "ProObjectGuid",
+      "prefix":"F_",
+      "fields": ["Description", "SasName","Caption"]
+    },
+    "ProFormGroup": {
+      "racine": "ProFormGroup",
+      "keyname": "ProObjectGuid",
+      
+      "fields": ["OrderNo", "ProFormGuid", "ProGroupGuid"]
+    },
+    "ProGroupItem": {
+      "racine": "ProGroupItem",
+      "keyname": "ProObjectGuid",
+      "fields": ["ProGroupGuid", "ProItemGuid", "OrderNo"]
+    },
+    "ProGroup": {
+      "racine": "ProGroup",
+      "keyname": "ProObjectGuid",
+      "prefix":"G_",
+      "fields": ["Caption"]
+    },
+    "ProItem": {
+      "racine": "ProItem",
+      "keyname": "ProObjectGuid",
+      "prefix":"I_",
+      "fields": ["Description", "Scale", "SasName", "MinLength", "MaxLength", "ProControlTypeId","ProItemCategoryGuid", "SasType", "ProCodeListGuid", "ProDataTypeId", "Hidden", "ReadOnly", "Disabled","Display","Caption","Status"]
+    },
+    "ProCodeList": {
+      "racine": "ProCodeList",
+      "keyname": "ProObjectGuid",
+      "fields": ["OrderNo", "Caption","Display"]
+    },
+    "ProCodeListItem": {
+      "racine": "ProCodeListItem",
+      "keyname": "ProObjectGuid",
+      "fields": ["ProCodeListGuid", "OrderNo", "Caption", "Value"]
+    },
+    "ProEdit": {
+      "racine": "ProEdit",
+      "keyname": "ProObjectGuid",
+      "fields": ["ProEditActionId", "TargetLevelId", "ProVisitFormGuid", "TargetProGroupGuid", "TargetProFormGuid", "ProGroupGuid", "ProGroupItemGuid", "ProItemGuid", "ActionExpression", "DataExpression", "Message", "TargetPath"]
+    },
+    "TBNode": {
+      "racine": "TBNode",
+      "keyname": "ProObjectGuid",
+      "fields": ["TBNodeId", "ParentTBNodeId", "Caption", "TBNodeTypeId"]
+    },
+    "ProScriptFunction":{
+        "racine": "ProScriptFunction",
+        "keyname": "ProObjectGuid",
+      "fields": ["Prototype", "Description", "Body"]
+    },
+    "ProItemCategory":{
+        "racine": "ProItemCategory",
+        "keyname": "ProObjectGuid",
+      "fields": ["Caption", "Description"]
+    }
+  }
+  
+
+
