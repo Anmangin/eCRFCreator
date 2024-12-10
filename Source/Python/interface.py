@@ -9,7 +9,7 @@ from tkinter.filedialog import askopenfilename, askdirectory
 from tkinter import messagebox
 from pathlib import Path
 from XML_Function import lire_et_trier_donnees, exporter_donnees_markdown_eCRF
-
+ 
 def Get_objt(root, racine, keyname, fields):
         ProForm = {}
         for FWAW in root.iter(racine):
