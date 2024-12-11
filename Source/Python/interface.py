@@ -137,7 +137,8 @@ root.geometry("500x400")
 root.configure(bg="#f7f5f2")  # Couleur de fond chaleureuse
 # Définir l'icône de la fenêtre
 execution_path = sys._MEIPASS if getattr(sys, 'frozen', False) else os.getcwd()
-root.iconbitmap(f'{execution_path}/Python/images.ico')  # Remplacez par le chemin de votre icône .ico
+
+root.iconbitmap(f"{execution_path}/Python/images.ico")  # Remplacez par le chemin de votre icône .ico
 
 # Variables pour stocker les chemins
 input_path_var = tk.StringVar()

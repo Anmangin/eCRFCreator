@@ -98,7 +98,11 @@ def ajouter_display_pro_codelist(data):
 def ajouter_display_pro_item(data):
     """Ajoute un champ 'Display' pour les ProItem."""
     for key, value in data["ProItem"].items():
-            if value["ProDataTypeId"] == "5":
+            
+            if value["ProDataTypeId"] == "5" and value["ProControlTypeId"] == "6":
+                print(value)
+                rep = "📅 YYYY"
+            elif value["ProDataTypeId"] == "5":
                 rep = "📅 DD/MM/YYYY"
             else:
                 rep = f"{value['SasType']} - {value['MaxLength']}"

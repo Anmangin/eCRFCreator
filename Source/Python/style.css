@@ -244,6 +244,7 @@ code {
     }
 
     .sidebar {
+             /* Réduit la taille globale à 80% */
         position: fixed; /* La sidebar reste fixe à gauche */
         top: 0;
         left: 0;
@@ -254,9 +255,9 @@ code {
         box-shadow: none; /* Enlève l'ombre pendant l'impression */
         border:none;
         height: 100%;  /* Prend toute la hauteur de la page */
-        padding: 5px;
-        font-size: 10px; /* Réduit la taille de la police pour s'ajuster */
-        line-height: 1.05; /* Réduit l'espacement entre les lignes pour plus de texte */
+        padding: 1px;
+        font-size: 5.5px; /* Réduit la taille de la police pour s'ajuster */
+        line-height: 1.00; /* Réduit l'espacement entre les lignes pour plus de texte */
         display: block;
         page-break-inside: avoid; /* Évite que la sidebar soit coupée entre les pages */
         page-break-before: always; /* Force la sidebar à commencer sur chaque nouvelle page */
