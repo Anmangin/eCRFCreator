@@ -9,7 +9,23 @@ from tkinter.filedialog import askopenfilename, askdirectory
 from tkinter import messagebox
 from pathlib import Path
 from XML_Function import lire_et_trier_donnees, exporter_donnees_markdown_eCRF
- 
+
+
+def save_json(ma_sortie, output_path, file_name="export.json"):
+    """Sauvegarde les données JSON dans un fichier."""
+    try:
+        # Construire le chemin complet du fichier de sortie
+        json_file_path = os.path.join(output_path, file_name)
+
+        # Écriture du fichier JSON
+        with open(json_file_path, "w", encoding="utf-8") as json_file:
+            json.dump(ma_sortie, json_file, ensure_ascii=False, indent=4)
+
+        print(f"Fichier JSON sauvegardé avec succès : {json_file_path}")
+    except Exception as e:
+        print(f"Erreur lors de la sauvegarde du JSON : {e}")
+
+
 def Get_objt(root, racine, keyname, fields):
         ProForm = {}
         for FWAW in root.iter(racine):
@@ -105,8 +121,13 @@ def run_program():
         data = lire_et_trier_donnees(Pathin, config_path)
         JSON_EXPORT = exporter_donnees_markdown_eCRF(data, False)  # Toujours False
 
+        ma_sortie =json.dumps(JSON_EXPORT)
+        output_path = output_path_var.get()
+        save_json(ma_sortie, output_path, file_name="resultat_export.json")
+
         # Génération du fichier HTML
         css = Path(f"{execution_path}/Python/style.css").read_text(encoding='utf-8')
+        printpage = Path(f"{execution_path}/Python/print.html").read_text(encoding='utf-8')
         JSON_Data = f"const jsonData = {json.dumps(JSON_EXPORT)};"
         chemin_html = f"{execution_path}/Python/Template_CRF.html"
         contenu_html = Path(chemin_html).read_text(encoding='utf-8')
@@ -115,6 +136,7 @@ def run_program():
             contenu_html
             .replace("// <JSONDATA>", JSON_Data)
             .replace("/* <css></css> */", css)
+            .replace("<!--<print></print> -->", printpage)
             .replace(r"\r\n", "<br>")
             .replace(r"\n", "<br>")
             .replace(r"\r", "<br>")

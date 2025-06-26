@@ -45,7 +45,7 @@ body {
 
 /* Styles généraux de la sidebar */
 .sidebar {
-    width: 300px;
+    width: 20%;
     padding: 10px;
     background-color: #f4f4f4;
     border-right: 2px solid #ccc;
@@ -58,7 +58,9 @@ body {
     padding: 5px;
     margin-bottom: 5px;
 }
-
+.sidebar.hidden {
+    transform: translateX(-100%);
+}
 .sidebar a:hover {
     background-color: #ddd;
 }
@@ -81,6 +83,7 @@ body {
     background-color: #fff;
     /* min-height: 100vh; */
     width:100%;
+    max-width:19cm
 }
 
 section {

@@ -1,0 +1,70 @@
+<script>
+    
+
+window.addEventListener('beforeunload', (event) => {
+    // Vous pouvez définir un message personnalisé (en fonction du navigateur, il peut ne pas s'afficher)
+    const message = "Êtes-vous sûr de vouloir quitter cette page ? Toutes les modifications non enregistrées seront perdues.";
+
+    // Certains navigateurs ne tiennent pas compte du message personnalisé,
+    // mais l'événement doit être annulé pour afficher l'avertissement.
+    event.returnValue = message;  // Standard
+    return message;  // Pour certains navigateurs (comme Chrome)
+});
+
+const pathname = window.location.pathname;
+
+// Extraire uniquement le nom du fichier
+let filename = pathname.substring(pathname.lastIndexOf('/') + 1);
+
+// Décoder les caractères spéciaux (comme %20 pour les espaces)
+filename = decodeURIComponent(filename);
+
+// Supprimer les extensions multiples (comme .html.pdf)
+filename = filename.replace(/\.(\w+)(\.\w+)+$/, ''); // Garde la première extension uniquement
+
+// Supprimer toute extension si nécessaire
+filename = filename.replace(/\.\w+$/, '');
+
+// Modifier le contenu de la balise <title>
+document.title = filename;
+    // Sélectionne le bouton et ajoute un écouteur d'événement
+    document.getElementById('print').addEventListener('click', function () {
+        // Vérifie si le document contient un 🔴
+        if (document.body.innerText.includes('🔴')) {
+            // Obtenir la date actuelle et formater en YY.MM.DD
+            const now = new Date();
+            const year = String(now.getFullYear()).slice(-2); // Année sur 2 chiffres
+            const month = String(now.getMonth() + 1).padStart(2, '0'); // Mois sur 2 chiffres
+            const day = String(now.getDate()).padStart(2, '0'); // Jour sur 2 chiffres
+
+            // Ajouter -MOD:YY.MM.DD au nom du fichier
+            filename += `-MOD:${year}.${month}.${day}`;
+        }
+
+        // Mettre à jour le titre de la page
+        document.title = filename;
+
+        // Lance la boîte de dialogue d'impression
+        window.print();
+    });
+
+
+
+    
+
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const content = document.getElementById('content');
+    sidebar.classList.toggle('hidden');
+    content.classList.toggle('no-sidebar');
+}
+
+document.addEventListener('click', (event) => {
+    // Vérifie si l'élément cliqué est le <h3> avec le texte "Table des matières"
+    if (event.target.tagName === 'H3' && event.target.textContent === 'Afficher toutes les pages') {
+        visibleonly("","ALL","0");
+    }
+});
+
+    </script>
+

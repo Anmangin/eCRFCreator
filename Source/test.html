@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Standalone File Loader</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 300px;
+            margin-bottom: 20px;
+        }
+        button {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Standalone File Loader</h1>
+    <button onclick="loadFile()">Charger le fichier</button>
+    <button onclick="saveFile()">Sauvegarder</button>
+    <textarea id="fileContent" placeholder="Le contenu du fichier s'affichera ici..."></textarea>
+
+    <script>
+        // Fonction pour charger un fichier via un input de type file
+        async function loadFile() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.txt';
+            
+            // Lorsqu'un fichier est sélectionné
+            input.onchange = async (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function() {
+                        document.getElementById('fileContent').value = reader.result;
+                    };
+                    reader.readAsText(file);
+                }
+            };
+
+            // Ouvrir le sélecteur de fichier
+            input.click();
+        }
+
+        // Fonction pour sauvegarder les modifications dans le fichier
+        async function saveFile() {
+            const content = document.getElementById("fileContent").value;
+            const blob = new Blob([content], { type: "text/plain" });
+            const fileHandle = window.URL.createObjectURL(blob);
+
+            // Créer un lien temporaire pour le téléchargement
+            const a = document.createElement("a");
+            a.href = fileHandle;
+            a.download = "test.txt";
+            a.click();
+            window.URL.revokeObjectURL(fileHandle);
+
+            alert("Fichier sauvegardé avec succès!");
+        }
+    </script>
+</body>
+</html>

@@ -11,78 +11,22 @@
      
 </head>
 <body>
+      <!-- Toggle Button -->
+      <button class="toggle-button" onclick="toggleSidebar()">Toggle Sidebar</button>
     <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
         <button id="toggle-button" class="pressed" data-state="DM">DM</button>
         <button id="print">imprimer les modifications</button>
-        <!-- <button onclick="saveAsWord()">Save as Word</button> -->
-        <script>
-            function saveAsWord() {
-                // Sélectionne le contenu de la page
-                const content = document.documentElement.outerHTML;
-    
-                // Crée un blob avec le contenu en type MIME pour Word
-                const blob = new Blob(['\ufeff' + content], {
-                    type: 'application/msword'
-                });
-    
-                // Crée un lien temporaire pour télécharger le fichier
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = 'page.doc'; // Nom du fichier par défaut
-    
-                // Simule un clic sur le lien pour lancer le téléchargement
-                link.click();
-    
-                // Libère l'URL temporaire
-                URL.revokeObjectURL(link.href);
-            }
-        </script>
-      
 
-        <script>
-               // Sélectionne le bouton et ajoute un écouteur d'événement
-        // Récupérer le chemin de l'URL
-        const pathname = window.location.pathname;
-
-        // Extraire uniquement le nom du fichier
-        let filename = pathname.substring(pathname.lastIndexOf('/') + 1);
-
-        // Décoder les caractères spéciaux (comme %20 pour les espaces)
-        filename = decodeURIComponent(filename);
-
-        // Supprimer les extensions multiples (comme .html.pdf)
-        filename = filename.replace(/\.(\w+)(\.\w+)+$/, ''); // Garde la première extension uniquement
-
-        // Supprimer toute extension si nécessaire
-        filename = filename.replace(/\.\w+$/, '');
-
-        // Modifier le contenu de la balise <title>
-        document.title = filename;
-            // Sélectionne le bouton et ajoute un écouteur d'événement
-            document.getElementById('print').addEventListener('click', function () {
-                // Vérifie si le document contient un 🔴
-                if (document.body.innerText.includes('🔴')) {
-                    // Obtenir la date actuelle et formater en YY.MM.DD
-                    const now = new Date();
-                    const year = String(now.getFullYear()).slice(-2); // Année sur 2 chiffres
-                    const month = String(now.getMonth() + 1).padStart(2, '0'); // Mois sur 2 chiffres
-                    const day = String(now.getDate()).padStart(2, '0'); // Jour sur 2 chiffres
+     <!-- Gestion de l'impression -->
+     <!--<print></print> -->
         
-                    // Ajouter -MOD:YY.MM.DD au nom du fichier
-                    filename += `-MOD:${year}.${month}.${day}`;
-                }
-        
-                // Mettre à jour le titre de la page
-                document.title = filename;
-        
-                // Lance la boîte de dialogue d'impression
-                window.print();
-            });
-        </script>
+   
 
 
-        <h3>Table des matières</h3>
+<a href="#" style="text-decoration: none; color: inherit;">
+    <h3 style="cursor: pointer;">Afficher toutes les pages</h3>
+</a>
         <div id="sidebar-links"></div>
     </div>
 
@@ -104,25 +48,6 @@
             <tbody id="change-list"></tbody>
         </table>
     </div>
-    <script>
-        function loadJSON(filePath) {
-    return fetch(filePath) // Charge le fichier JSON à partir du chemin spécifié
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Erreur lors du chargement du fichier JSON');
-            }
-            return response.json(); // Parse le contenu du fichier JSON
-        })
-        .then(data => {
-            return data; // Renvoie les données JSON une fois qu'elles sont chargées
-        })
-        .catch(error => {
-            console.error('Erreur:', error); // Gère les erreurs
-            return null; // Retourne null en cas d'erreur
-        });
-}
-</script>
-
 
 
 <script>
@@ -172,6 +97,29 @@ jsonData.visites.forEach((visite, visitIndex) => {
 
 // Fonction visibleonly
 function visibleonly(data, type, index) {
+
+    if (type === 'ALL') {
+        let h1list = document.getElementsByTagName('h1');
+
+for (let visit of h1list) {
+// Gérer la visibilité des visites
+visit.classList.remove('hidden');
+visit.classList.add('show');
+}
+
+
+let sectionlist = document.getElementsByTagName('section');
+
+for (let section of sectionlist) {
+    sectionid=section.id.split('f')[0];;
+        section.classList.remove('hidden');
+        section.classList.add('show');
+    }
+
+    
+
+    }
+    else {
 
     if (type === 'visite') {
 
@@ -240,7 +188,7 @@ function visibleonly(data, type, index) {
                 section.classList.add('hidden');
             }
         }
-
+    }
     }
 }
 
@@ -507,19 +455,6 @@ rowp.style.height = "0px"; // Hauteur de la ligne
 rowp.style.overflow = "hidden"; // Permet au contenu de dépasser la hauteur
 rowp.style.visibility = "hidden"; // Masque la ligne, mais pas son contenu
 
-// const tdx = document.createElement('td');
-// tdx.colSpan = 6; // Ajustez selon le nombre de colonnes
-// tdx.style.position = "absolute"; // Permet de positionner le texte par-dessus le tableau
-// tdx.style.top = "0px"; // Positionne le texte à l'endroit souhaité (ajustez si nécessaire)
-// tdx.style.left = "0px"; // Positionne le texte à l'endroit souhaité (ajustez si nécessaire)
-// tdx.style.textAlign = 'left';
-// tdx.style.zIndex = "10"; // Place le texte au-dessus des autres éléments (ajustez si nécessaire)
-// tdx.textContent = '+'; // Contenu du texte
-
-// // Ajoutez la cellule au tableau
-// rowp.appendChild(tdx);
-// table.appendChild(rowp);
-
           
         });
 
@@ -535,16 +470,6 @@ rowp.style.visibility = "hidden"; // Masque la ligne, mais pas son contenu
 }
 
 
-
-window.addEventListener('beforeunload', (event) => {
-    // Vous pouvez définir un message personnalisé (en fonction du navigateur, il peut ne pas s'afficher)
-    const message = "Êtes-vous sûr de vouloir quitter cette page ? Toutes les modifications non enregistrées seront perdues.";
-
-    // Certains navigateurs ne tiennent pas compte du message personnalisé,
-    // mais l'événement doit être annulé pour afficher l'avertissement.
-    event.returnValue = message;  // Standard
-    return message;  // Pour certains navigateurs (comme Chrome)
-});
         // Function to generate all fiches for a visit
         function generateFiches(visite,vid) {
 
@@ -664,6 +589,7 @@ function updateChangeLog() {
 }
 
 </script>
+
 
 
 </body>
