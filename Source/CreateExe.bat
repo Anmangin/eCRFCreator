@@ -11,6 +11,7 @@ pyinstaller --onefile --noconsole --icon=images.ico ^
 --add-data "Python/style.css;Python" ^
 --add-data "Python/sidebar.js;Python" ^
 --add-data "Python/Template_CRF.html;Python" ^
+--add-data "Python/print.html;Python" ^
 --add-data "images.ico;Python" ^
 "%SCRIPT_DIR%/Python/interface.py"
 

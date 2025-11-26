@@ -15,6 +15,9 @@
       <button class="toggle-button" onclick="toggleSidebar()">Toggle Sidebar</button>
     <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
+        <label>
+            <input type="checkbox" id="validOnlyCheckbox"> Valid only
+          </label>
         <button id="toggle-button" class="pressed" data-state="DM">DM</button>
         <button id="print">imprimer les modifications</button>
 
@@ -587,6 +590,24 @@ function updateChangeLog() {
         changeList.appendChild(row);
     }
 }
+
+document.getElementById('validOnlyCheckbox').addEventListener('change', function () {
+    const showOnlyValid = this.checked;
+    const detailsBlocks = document.querySelectorAll('details');
+
+    detailsBlocks.forEach(detail => {
+      const contentText = detail.innerHTML.toLowerCase(); // tout le contenu
+      const hasValid = contentText.includes('valid:');
+
+      if (showOnlyValid) {
+        // on garde que ceux qui contiennent "Valid:"
+        detail.style.display = hasValid ? '' : 'none';
+      } else {
+        // on réaffiche tout
+        detail.style.display = '';
+      }
+    });
+  });
 
 </script>
 
