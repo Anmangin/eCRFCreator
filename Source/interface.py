@@ -23,17 +23,26 @@ def resource_base() -> Path:
     """
     return Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent))
 
-def resource_path(rel_path: str) -> Path:
-    """Chemin absolu vers une ressource packagée."""
-    return resource_base() / rel_path
+
+def resource_path(relative_path):
+    # Mode EXE → fichiers extraits dans sys._MEIPASS
+    if hasattr(sys, "_MEIPASS"):
+        base_path = sys._MEIPASS
+    else:
+        # Mode script → dossier courant du script Python
+        base_path = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(base_path, relative_path)
 
 def tcl_path_str(p: Path) -> str:
     """Chemin normalisé pour Tk/Tcl (slashes)."""
     return str(p).replace("\\", "/")
 
 def read_text(rel_path: str, encoding="utf-8") -> str:
+
+  
     """Lecture texte sûre depuis une ressource packagée."""
     p = resource_path(rel_path)
+    print(rel_path)
     return p.read_text(encoding=encoding)
 
 
