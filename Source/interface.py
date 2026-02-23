@@ -38,12 +38,10 @@ def tcl_path_str(p: Path) -> str:
     return str(p).replace("\\", "/")
 
 def read_text(rel_path: str, encoding="utf-8") -> str:
-
-  
     """Lecture texte sûre depuis une ressource packagée."""
     p = resource_path(rel_path)
     print(rel_path)
-    return p.read_text(encoding=encoding)
+    return open(p, encoding=encoding).read()
 
 
 # ===================== I/O JSON =====================

@@ -9,10 +9,10 @@ body {
 }
 .sidebar {
     position: fixed;
-    top: 0;
+    top: 50px;
     left: 0;
     width: 250px;
-    height: 100%;
+    height: calc(100% - 50px); 
     background-color: #f4f4f4;
     padding-top: 20px;
     padding-left: 10px;
@@ -311,6 +311,14 @@ code {
     border: none;
     border-radius: 5px;
 }
+
+.toggle-button {
+    position: fixed;   /* keep it in a fixed position */
+    top: 10px;         /* distance from top */
+    left: 10px;        /* distance from left */
+    z-index: 9999;     /* make sure it's above the sidebar */
+}
+
 #toggle-button.released {
     background-color: #6C757D;
 }
