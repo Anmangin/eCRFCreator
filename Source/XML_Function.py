@@ -151,12 +151,13 @@ def get_message(data,ProItemGuid,ProGroupGuid,ProFormGuid):
             EditACtion= Edit["ProEditActionId"]
             if   EditACtion =="1"           :EditACtion="Valid"
             elif EditACtion =="3"           :EditACtion="Enabled"
-            
+            elif EditACtion =="5"           :EditACtion="Required Enabled"
             elif EditACtion =="6"           :EditACtion="Hidden"
+            elif EditACtion =="7"           :EditACtion="Read only"
             elif EditACtion =="10"          :EditACtion="DVA"
             elif EditACtion =="11"          :EditACtion="Email"
             elif EditACtion =="9"           :EditACtion="DVC"
-            elif EditACtion =="21"           :EditACtion="required Enabled"
+            elif EditACtion =="21"           :EditACtion="disabled hidden"
             elif EditACtion =="23"          :EditACtion="Dynamic codelist filter"
             msg=Edit["Message"]
             chk=Edit["ActionExpression"]
