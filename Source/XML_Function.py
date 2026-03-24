@@ -3,6 +3,9 @@ import json
 import xml.etree.ElementTree as ET
 import xlsxwriter
 from bs4 import BeautifulSoup
+from docx.shared import Cm
+from docx.shared import RGBColor
+import re
 
 
 
@@ -162,6 +165,7 @@ def check_data_type(number):
     elif number =="13":return "Label"
     elif number =="16":return "Textbox with MedDRA"
     elif number =="18":return "Timer"
+    elif number =="18":return "ComboBox Dynamic"
     return number
 
 
@@ -360,6 +364,10 @@ def create_graph(data):
                 dictionnary[guid]['Description'] = elem.find('Description').text
             except:
                 pass
+            try:
+                dictionnary[guid]['Hidden'] = elem.find('Hidden').text
+            except:
+                pass
     # Links
     for i in range(6):
         link = "Pro" + nodes[i] + nodes[i+1]
@@ -517,26 +525,41 @@ def print_doc_xml(xmlFile, docFile, head=None):
     # Find the head
     if head == None:
         for k, v in graph.items():
-            if v['tag'] == 'ProTrial':
+            if v['tag'] == 'ProPatient':
                 head = k
                 break
     from docx import Document
     document = Document()
-    internal_func_doc(graph, document, head=head, lvl=0, buffer=list())
+    document.add_heading("SUMMARY", level=1)
+    internal_func_doc(graph, document, head=head, lvl=2, unique=False, summary=True)
+    document.add_page_break()
+    document.add_heading("CRF", level=1)
+    internal_func_doc(graph, document, head=head, lvl=2, buffer=list())
     document.save(docFile)
 
 
-def internal_func_doc(graph, documentName, head=None, lvl=0, buffer=list(), maxi=False):
+def internal_func_doc(graph, documentName, head=None, lvl=0, buffer=list(), maxi=False, unique=True,uniqueList=list(), summary=False):
     lns = graph[head]['child']
     tag = graph[head]['tag']
+    if tag == 'ProVisit' and not summary:
+        documentName.add_page_break()
+    if summary and tag not in ["ProTrial", "ProSite", "ProPatient", "ProVisit", "ProForm"]:
+        return
     try:
         desc = graph[head]['Description'].strip()
         soup = BeautifulSoup(desc, "html.parser")
         desc = soup.get_text()
+        if unique and tag in ["ProTrial", "ProSite", "ProPatient", "ProVisit", "ProForm"]:
+            if head in uniqueList: return
+            uniqueList.append(head)
         try:
             typ = check_data_type(graph[head]['type'])
         except:
             typ = ''
+        try:
+            hidden = graph[head]['Hidden']
+        except:
+            hidden = False
         try:
             sasNam = graph[head]['SasName']
         except:
@@ -548,26 +571,33 @@ def internal_func_doc(graph, documentName, head=None, lvl=0, buffer=list(), maxi
         except:
             repeat = ""
         if len(desc) > 0:
-            #print(desc, typ, sep="\t")
             if len(typ) == 0:
                 try:
                     documentName.add_heading(desc, level=lvl)
                 except ValueError:
                     documentName.add_heading(desc, level=9)
             else:
-                buffer = (desc, typ, list())
-    except:
-        #print("\t", graph[head]['Caption'])
+                buffer = (desc, typ, list(), hidden)
+    except KeyError:
         buffer[2].append(graph[head]['Caption'])
     if len(buffer) > 0 and len(lns) == 0 and (maxi or tag != 'ProCodeListItem'):
-        table = documentName.add_table(rows=1, cols=3)
+        table = documentName.add_table(rows=1, cols=2)
+        if buffer[3] and buffer[3] == "True":
+            table.style = 'Medium Shading 1'
+        else:
+            table.style = 'Light Grid Accent 1'
         hdr_cells = table.rows[0].cells
+        hdr_cells[0].width = Cm(14)
         hdr_cells[0].text = buffer[0].replace("\\r\\n", "\n")
-        hdr_cells[1].text = buffer[1]
         codeList = "\n".join(buffer[2])
+        hdr_cells[1].width = Cm(6)
         if len(buffer[2]) > 10:
             codeList = "\n".join(buffer[2][0:4] + ['...'] + buffer[2][-4:-1])
-        hdr_cells[2].text = codeList
+        if len(codeList)>0:
+            para = hdr_cells[1].paragraphs[0].add_run(codeList)
+            para.font.color.rgb = RGBColor(255, 0, 0)
+        else:
+            hdr_cells[1].text = buffer[1]
         buffer = list()
     ls = sorted(lns, key = lambda e:e[1])
     lvl = lvl + 1
@@ -577,7 +607,7 @@ def internal_func_doc(graph, documentName, head=None, lvl=0, buffer=list(), maxi
             maxi = True
         else:
             maxi = False
-        internal_func_doc(graph, documentName, e[0], lvl, buffer, maxi)
+        internal_func_doc(graph, documentName, e[0], lvl, buffer, maxi, unique, uniqueList, summary=summary)
 
 
 
