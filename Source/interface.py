@@ -77,7 +77,7 @@ def validate_xml_file(filepath):
     try:
         with open(filepath, 'r', encoding='utf-8') as file:
             first_line = file.readline().strip().lstrip('\ufeff')
-            if not first_line.lower().startswith('<?xml ') or 'encoding="utf-8"' not in first_line.lower():
+            if first_line.lower()[0:5] !="<?xml" or not ("encoding='utf-8'" in first_line.lower() or 'encoding="utf-8"' in first_line.lower()):
                 return False, "En-tête XML inattendu (attendu: XML UTF-8)."
 
         tree = ET.parse(filepath)
