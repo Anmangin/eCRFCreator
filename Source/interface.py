@@ -10,7 +10,7 @@ from tkinter import messagebox
 from pathlib import Path
 
 # --- tes imports métiers
-from XML_Function import lire_et_trier_donnees, exporter_donnees_markdown_eCRF
+from XML_Function import lire_et_trier_donnees, exporter_donnees_markdown_eCRF, print_xls_from_edit_check, print_doc_xml
 
 
 # ===================== Utils PyInstaller / chemins =====================
@@ -38,12 +38,10 @@ def tcl_path_str(p: Path) -> str:
     return str(p).replace("\\", "/")
 
 def read_text(rel_path: str, encoding="utf-8") -> str:
-
-  
     """Lecture texte sûre depuis une ressource packagée."""
     p = resource_path(rel_path)
     print(rel_path)
-    return p.read_text(encoding=encoding)
+    return open(p, encoding=encoding).read()
 
 
 # ===================== I/O JSON =====================
@@ -173,6 +171,8 @@ def run_program():
         out_html = os.path.join(output_path, f"{file_name}.html")
         with open(out_html, 'w', encoding='utf-8') as f:
             f.write(final_export)
+        print_xls_from_edit_check(Pathin, out_html.replace('html', 'xlsx'))
+        print_doc_xml(Pathin, out_html.replace('html', 'docx'))
 
         print(f"Le fichier {out_html} a été généré avec succès.")
         messagebox.showinfo("Succès", "Le programme a été exécuté avec succès !")
@@ -192,7 +192,7 @@ root.configure(bg="#f7f5f2")
 # Icône: ICO -> fallback PNG
 try:
     ico = resource_path("Python/images.ico")
-    if ico.exists():
+    if os.path.exists(ico):
         root.iconbitmap(tcl_path_str(ico))
     else:
         raise FileNotFoundError("ICO manquant")
