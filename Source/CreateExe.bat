@@ -13,7 +13,7 @@ pyinstaller --onefile --noconsole --icon=images.ico ^
 --add-data "Python/Template_CRF.html;Python" ^
 --add-data "Python/print.html;Python" ^
 --add-data "images.ico;Python" ^
-"%SCRIPT_DIR%/Python/interface.py"
+"%SCRIPT_DIR%/interface.py"
 
 REM Attendre avant de fermer la fenêtre (facultatif)
 pause
