@@ -2,7 +2,7 @@
 
 
 a = Analysis(
-    ['C:\\Users\\a_mangin\\Documents\\GitHub\\eCRFCreator\\Source\\/Python/interface.py'],
+    ['C:\\Users\\a_mangin\\Documents\\GitHub\\eCRFCreator\\Source\\/interface.py'],
     pathex=[],
     binaries=[],
     datas=[('Python/config.json', 'Python'), ('Python/style.css', 'Python'), ('Python/sidebar.js', 'Python'), ('Python/Template_CRF.html', 'Python'), ('Python/print.html', 'Python'), ('images.ico', 'Python')],
