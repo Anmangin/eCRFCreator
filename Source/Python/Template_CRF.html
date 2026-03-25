@@ -1,618 +1,576 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- <link rel="stylesheet" href="style.css"> -->
-     <style>
-        /* <css></css> */
-     </style>
-     <title> </title>
-     
-</head>
-<body>
-      <!-- Toggle Button -->
-      <button class="toggle-button" onclick="toggleSidebar()">Toggle Sidebar</button>
+    <style>
+      /* <css></css> */
+    </style>
+    <title> </title>
+  </head>
+  <body>
+    <!-- Toggle Button -->
+    <button class="toggle-button" onclick="toggleSidebar()">
+      Toggle Sidebar
+    </button>
     <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
-        <label>
-            <input type="checkbox" id="validOnlyCheckbox"> Valid only
-          </label>
-        <button id="toggle-button" class="pressed" data-state="DM">DM</button>
-        <button id="print">imprimer les modifications</button>
+      <label>
+        <input type="checkbox" id="validOnlyCheckbox" /> Valid only
+      </label>
+      <button id="toggle-button" class="pressed" data-state="DM">DM</button>
+      <button id="print">imprimer les modifications</button>
 
-     <!-- Gestion de l'impression -->
-     <!--<print></print> -->
-        
-   
+      <!-- Gestion de l'impression -->
+      <!--<print></print> -->
 
-
-<a href="#" style="text-decoration: none; color: inherit;">
-    <h3 style="cursor: pointer;">Afficher toutes les pages</h3>
-</a>
-        <div id="sidebar-links"></div>
+      <a href="#" style="text-decoration: none; color: inherit">
+        <h3 style="cursor: pointer">Afficher toutes les pages</h3>
+      </a>
+      <div id="sidebar-links"></div>
     </div>
 
     <!-- Main Content -->
-    <div class="content" id="main-content">
+    <div class="content" id="main-content"></div>
+    <div class="content" id="change-log" style="margin-top: 20px">
+      <h3>Liste des changements à faire</h3>
+      <table
+        id="change-table"
+        border="1"
+        style="border-collapse: collapse; width: 100%"
+      >
+        <thead>
+          <tr>
+            <th>Fiche</th>
+            <th>caption</th>
+            <th>Description modifié</th>
+            <th>Response Type</th>
+            <th>SAS Name</th>
+          </tr>
+        </thead>
+        <tbody id="change-list"></tbody>
+      </table>
     </div>
-    <div class="content" id="change-log" style="margin-top: 20px;">
-        <h3>Liste des changements à faire</h3>
-        <table id="change-table" border="1" style="border-collapse: collapse; width: 100%;">
-            <thead>
-                <tr>
-                    <th>Fiche</th>
-                    <th>caption</th>
-                    <th>Description modifié</th>
-                    <th>Response Type</th>
-                    <th>SAS Name</th>
-                </tr>
-            </thead>
-            <tbody id="change-list"></tbody>
-        </table>
-    </div>
 
+    <script>
+      // <JSONDATA>
 
-<script>
+      const exportData = {};
+      const sidebarLinks = document.getElementById("sidebar-links");
+      const mainContent = document.getElementById("main-content");
 
-// <JSONDATA>
+      // Générer les liens dynamiquement à partir des visites et fiches
+      jsonData.visites.forEach((visite, visitIndex) => {
+        const vindex = `v${visitIndex}`;
+        visite.visitIndex = visitIndex;
 
-
-const exportData  = {};
-const sidebarLinks = document.getElementById('sidebar-links');
-const mainContent = document.getElementById('main-content');
-
-// Générer les liens dynamiquement à partir des visites et fiches
-jsonData.visites.forEach((visite, visitIndex) => {
-    const vindex= `v${visitIndex}`
-    visite.visitIndex = visitIndex;
-
-    // Créer un lien pour la visite
-    const visitLink = document.createElement('a');
-    visitLink.href =`#${vindex}`;
-    visitLink.style = "background-color: #ADD8E6; color: black; padding: 5px; border-radius: 5px; text-decoration: none;";
-    visitLink.className = `visit`;
-    visitLink.innerText = `${visitIndex + 1}: ${visite.V_description}`;
-	generateFiches(visite,vindex);  
-    visitLink.addEventListener('click', () => {
-
-        visibleonly(jsonData, 'visite', vindex);
-    });
-    sidebarLinks.appendChild(visitLink);
-
-    // Parcourir les fiches de la visite
-    visite.fiches.forEach((fiche, ficheIndex) => {
-        const findex=`v${visitIndex}f${ficheIndex}`;
-        fiche.ficheIndex = findex;
-
-        // Créer un lien pour la fiche
-        const ficheLink = document.createElement('a');
-        ficheLink.href = `#${findex}`;
-        ficheLink.className = `form`; // Utilisez `className` ici
-        ficheLink.style="margin-left: 20px;"
-        ficheLink.innerText = `${ficheIndex + 1}: ${fiche.F_description}`;
-        ficheLink.addEventListener('click', () => {
-            visibleonly(visite, 'fiche', findex);
+        // Créer un lien pour la visite
+        const visitLink = document.createElement("a");
+        visitLink.href = `#${vindex}`;
+        visitLink.style =
+          "background-color: #ADD8E6; color: black; padding: 5px; border-radius: 5px; text-decoration: none;";
+        visitLink.className = `visit`;
+        visitLink.innerText = `${visitIndex + 1}: ${visite.V_description}`;
+        generateFiches(visite, vindex);
+        visitLink.addEventListener("click", () => {
+          visibleonly(jsonData, "visite", vindex);
         });
-        sidebarLinks.appendChild(ficheLink);
-    });
-});
+        sidebarLinks.appendChild(visitLink);
 
-// Fonction visibleonly
-function visibleonly(data, type, index) {
+        // Parcourir les fiches de la visite
+        visite.fiches.forEach((fiche, ficheIndex) => {
+          const findex = `v${visitIndex}f${ficheIndex}`;
+          fiche.ficheIndex = findex;
 
-    if (type === 'ALL') {
-        let h1list = document.getElementsByTagName('h1');
+          // Créer un lien pour la fiche
+          const ficheLink = document.createElement("a");
+          ficheLink.href = `#${findex}`;
+          ficheLink.className = `form`; // Utilisez `className` ici
+          ficheLink.style = "margin-left: 20px;";
+          ficheLink.innerText = `${ficheIndex + 1}: ${fiche.F_description}`;
+          ficheLink.addEventListener("click", () => {
+            visibleonly(visite, "fiche", findex);
+          });
+          sidebarLinks.appendChild(ficheLink);
+        });
+      });
 
-for (let visit of h1list) {
-// Gérer la visibilité des visites
-visit.classList.remove('hidden');
-visit.classList.add('show');
-}
+      // Fonction visibleonly
+      function visibleonly(data, type, index) {
+        if (type === "ALL") {
+          let h1list = document.getElementsByTagName("h1");
 
+          for (let visit of h1list) {
+            // Gérer la visibilité des visites
+            visit.classList.remove("hidden");
+            visit.classList.add("show");
+          }
 
-let sectionlist = document.getElementsByTagName('section');
+          let sectionlist = document.getElementsByTagName("section");
 
-for (let section of sectionlist) {
-    sectionid=section.id.split('f')[0];;
-        section.classList.remove('hidden');
-        section.classList.add('show');
-    }
-
-    
-
-    }
-    else {
-
-    if (type === 'visite') {
-
-        let h1list = document.getElementsByTagName('h1');
-
-        for (let visit of h1list) {
-        // Gérer la visibilité des visites
-       
-       if (visit.id==index){
-
-        visit.classList.remove('hidden');
-        visit.classList.add('show');
+          for (let section of sectionlist) {
+            sectionid = section.id.split("f")[0];
+            section.classList.remove("hidden");
+            section.classList.add("show");
+          }
         } else {
+          if (type === "visite") {
+            let h1list = document.getElementsByTagName("h1");
 
-            visit.classList.remove('show');
-            visit.classList.add('hidden');
+            for (let visit of h1list) {
+              // Gérer la visibilité des visites
+
+              if (visit.id == index) {
+                visit.classList.remove("hidden");
+                visit.classList.add("show");
+              } else {
+                visit.classList.remove("show");
+                visit.classList.add("hidden");
+              }
+            }
+
+            let sectionlist = document.getElementsByTagName("section");
+
+            for (let section of sectionlist) {
+              sectionid = section.id.split("f")[0];
+              if (sectionid == index) {
+                section.classList.remove("hidden");
+                section.classList.add("show");
+              } else {
+                section.classList.remove("show");
+                section.classList.add("hidden");
+              }
+            }
+          } else if (type === "fiche") {
+            let h1list = document.getElementsByTagName("h1");
+            for (let visit of h1list) {
+              VIsitindex = index.split("f")[0];
+              if (visit.id == VIsitindex) {
+                visit.classList.remove("hidden");
+                visit.classList.add("show");
+              } else {
+                visit.classList.remove("show");
+                visit.classList.add("hidden");
+              }
+            }
+
+            let sectionlist = document.getElementsByTagName("section");
+
+            for (let section of sectionlist) {
+              sectionid = section.id;
+              if (sectionid == index) {
+                section.classList.remove("hidden");
+                section.classList.add("show");
+              } else {
+                section.classList.remove("show");
+                section.classList.add("hidden");
+              }
+            }
+          }
         }
+      }
 
+      // Fonction pour ajouter l'écouteur d'événements de manière globale
+      function updateExportData(td1, td2, td3) {
+        const formKey = td1.getAttribute("data-form");
+        const sourceKey = td1.getAttribute("data-source");
+        const datacaption = td1.getAttribute("data-caption");
+        const dataorder = td1.getAttribute("data-order");
 
+        const sourceresp = td2.getAttribute("data-source");
+        const sourceSAS = td3.getAttribute("data-source");
 
-        };
-        
+        // Récupérer les valeurs actuelles des cellules
+        const currentDescription = td1.innerText;
+        const currentResponseType = td2.innerText;
+        const currentSasName = td3.innerText;
 
-        let sectionlist = document.getElementsByTagName('section');
+        // Récupérer les valeurs modifiées des champs de saisie
+        const modifyTXT1 = document.getElementById(aeraID + "1").value;
+        const modifyHTML2 = document.getElementById(aeraID + "2").value;
+        const modifyTXT3 = document.getElementById(aeraID + "3").value;
+        const displayTxT1 = modifyTXT1 === sourceKey ? "N/A" : modifyTXT1;
+        const displayTxT2 = modifyHTML2 === sourceresp ? "N/A" : modifyHTML2;
+        const displayTxT3 = modifyTXT3 === sourceSAS ? "N/A" : modifyTXT3;
 
-        for (let section of sectionlist) {
-            sectionid=section.id.split('f')[0];;
-            if (sectionid==index) {
-                section.classList.remove('hidden');
-                section.classList.add('show');
-            }
-        else {
-                section.classList.remove('show');
-                section.classList.add('hidden');
-            }
-        }
-
-
-
-    } else if (type === 'fiche') {
-        let h1list = document.getElementsByTagName('h1');
-        for (let visit of h1list) {
-            VIsitindex=index.split('f')[0];;
-            if (visit.id==VIsitindex) {
-                visit.classList.remove('hidden');
-                visit.classList.add('show');
-            }
-        else {
-            visit.classList.remove('show');
-            visit.classList.add('hidden');
-            }
-
-        }
-
-
-        let sectionlist = document.getElementsByTagName('section');
-
-        for (let section of sectionlist) {
-            sectionid=section.id;
-            if (sectionid==index) {
-                section.classList.remove('hidden');
-                section.classList.add('show');
-            }
-        else {
-                section.classList.remove('show');
-                section.classList.add('hidden');
-            }
-        }
-    }
-    }
-}
-
-// Fonction pour ajouter l'écouteur d'événements de manière globale
-function updateExportData(td1, td2, td3) {
-    const formKey = td1.getAttribute("data-form");
-    const sourceKey = td1.getAttribute("data-source");
-    const datacaption = td1.getAttribute("data-caption");
-    const dataorder = td1.getAttribute("data-order");
-
-    const sourceresp = td2.getAttribute("data-source");
-    const sourceSAS = td3.getAttribute("data-source");
-
-
-    // Récupérer les valeurs actuelles des cellules
-    const currentDescription = td1.innerText;
-    const currentResponseType = td2.innerText;
-    const currentSasName = td3.innerText;
-
-    // Récupérer les valeurs modifiées des champs de saisie
-    const modifyTXT1 = document.getElementById(aeraID + '1').value;
-    const modifyHTML2 = document.getElementById(aeraID + '2').value;
-    const modifyTXT3 = document.getElementById(aeraID + '3').value;
-    const displayTxT1 = (modifyTXT1 === sourceKey) ? "N/A" : modifyTXT1;
-    const displayTxT2 = (modifyHTML2 === sourceresp) ? "N/A" : modifyHTML2;
-    const displayTxT3 = (modifyTXT3 === sourceSAS) ? "N/A" : modifyTXT3;
-
-    // Vérifier s'il y a un changement
-    if (modifyTXT1 !== currentDescription || modifyHTML2 !== currentResponseType || modifyTXT3 !== currentSasName) {
-        // Si des changements sont détectés, mettre à jour l'objet exportData
-        if (!exportData[formKey]) {
+        // Vérifier s'il y a un changement
+        if (
+          modifyTXT1 !== currentDescription ||
+          modifyHTML2 !== currentResponseType ||
+          modifyTXT3 !== currentSasName
+        ) {
+          // Si des changements sont détectés, mettre à jour l'objet exportData
+          if (!exportData[formKey]) {
             exportData[formKey] = {}; // Initialiser l'objet pour le formulaire s'il n'existe pas
-        }
-        exportData[formKey][datacaption] = {
-            dataorder:dataorder,
+          }
+          exportData[formKey][datacaption] = {
+            dataorder: dataorder,
             description: displayTxT1,
             responseType: displayTxT2,
-            sasName: displayTxT3
-        };
+            sasName: displayTxT3,
+          };
 
-        // Appeler la fonction de mise à jour de la liste des changements
-        updateChangeLog();
-    }
-}
+          // Appeler la fonction de mise à jour de la liste des changements
+          updateChangeLog();
+        }
+      }
 
-function addGlobalClickListener() {
-    document.addEventListener('click', (event) => {
-        if (event.target && (event.target.innerHTML === '✏️' || event.target.innerHTML === '💾')) {
+      function addGlobalClickListener() {
+        document.addEventListener("click", (event) => {
+          if (
+            event.target &&
+            (event.target.innerHTML === "✏️" || event.target.innerHTML === "💾")
+          ) {
             originID = event.target.getAttribute("id").substr(3);
 
-            td0 = document.getElementById('td0' + originID);
-            td1 = document.getElementById('td1' + originID);
-            td2 = document.getElementById('td2' + originID);
-            td3 = document.getElementById('td3' + originID);
+            td0 = document.getElementById("td0" + originID);
+            td1 = document.getElementById("td1" + originID);
+            td2 = document.getElementById("td2" + originID);
+            td3 = document.getElementById("td3" + originID);
             But = document.getElementById("But" + originID);
 
-            aeraID = 'ARE' + originID;
+            aeraID = "ARE" + originID;
 
-            if (event.target && event.target.innerHTML === '✏️') {
-                // Récupérer les valeurs existantes
-                previousTXT = td1.innerHTML;
-                previousHTML2 = td2.innerHTML; // Contenu de td2
-                previousTXT3 = td3.innerText;
+            if (event.target && event.target.innerHTML === "✏️") {
+              // Récupérer les valeurs existantes
+              previousTXT = td1.innerHTML;
+              previousHTML2 = td2.innerHTML; // Contenu de td2
+              previousTXT3 = td3.innerText;
 
-                // Remplacer le texte statique par des champs texte (textarea)
-                td1.innerHTML = '';
-                td2.innerHTML = '';
-                td3.innerHTML = '';
+              // Remplacer le texte statique par des champs texte (textarea)
+              td1.innerHTML = "";
+              td2.innerHTML = "";
+              td3.innerHTML = "";
 
-                const inputField1 = document.createElement('textarea');
-                inputField1.id = aeraID + '1';
-                inputField1.innerText = previousTXT || ''; // Valeur actuelle de td1
-                td1.appendChild(inputField1);
+              const inputField1 = document.createElement("textarea");
+              inputField1.id = aeraID + "1";
+              inputField1.innerText = previousTXT || ""; // Valeur actuelle de td1
+              td1.appendChild(inputField1);
 
-                const inputField2 = document.createElement('textarea');
-                inputField2.id = aeraID + '2';
-                inputField2.innerText = previousHTML2; // Valeur actuelle de td2
-                td2.appendChild(inputField2);
+              const inputField2 = document.createElement("textarea");
+              inputField2.id = aeraID + "2";
+              inputField2.innerText = previousHTML2; // Valeur actuelle de td2
+              td2.appendChild(inputField2);
 
-                const inputField3 = document.createElement('textarea');
-                inputField3.id = aeraID + '3';
-                inputField3.innerText = previousTXT3 || ''; // Valeur actuelle de td3
-                td3.appendChild(inputField3);
+              const inputField3 = document.createElement("textarea");
+              inputField3.id = aeraID + "3";
+              inputField3.innerText = previousTXT3 || ""; // Valeur actuelle de td3
+              td3.appendChild(inputField3);
 
-                // Créer un bouton "Save"
-                td0.innerHTML = '';
-                const saveButton = document.createElement('button');
-                saveButton.id = "But" + originID;
-                saveButton.innerHTML = '💾';
-                td0.appendChild(saveButton);
+              // Créer un bouton "Save"
+              td0.innerHTML = "";
+              const saveButton = document.createElement("button");
+              saveButton.id = "But" + originID;
+              saveButton.innerHTML = "💾";
+              td0.appendChild(saveButton);
             }
 
             // Quand on clique sur "Save", sauvegarder la modification
-            if (event.target && event.target.innerHTML === '💾') {
-                updateExportData(td1, td2, td3);
+            if (event.target && event.target.innerHTML === "💾") {
+              updateExportData(td1, td2, td3);
 
-                const modifyTXT1 = document.getElementById(aeraID + '1').value;
-                const modifyHTML2 = document.getElementById(aeraID + '2').value;
-                const modifyTXT3 = document.getElementById(aeraID + '3').value;
+              const modifyTXT1 = document.getElementById(aeraID + "1").value;
+              const modifyHTML2 = document.getElementById(aeraID + "2").value;
+              const modifyTXT3 = document.getElementById(aeraID + "3").value;
 
-              
+              // Mise à jour de td1, td2, et td3 avec les nouvelles valeurs
+              td1.innerHTML = modifyTXT1;
+              td2.innerHTML = modifyHTML2;
+              td3.innerHTML = modifyTXT3;
 
-                // Mise à jour de td1, td2, et td3 avec les nouvelles valeurs
-                td1.innerHTML = modifyTXT1;
-                td2.innerHTML = modifyHTML2;
-                td3.innerHTML = modifyTXT3;
-
-                // Remise à zéro de td0 et ajout du bouton "Modifier"
-                td0.innerHTML = '🔴';
-                const modButton = document.createElement('button');
-                modButton.id = "But" + originID;
-                modButton.innerHTML = '✏️';
-                td0.appendChild(modButton);
+              // Remise à zéro de td0 et ajout du bouton "Modifier"
+              td0.innerHTML = "🔴";
+              const modButton = document.createElement("button");
+              modButton.id = "But" + originID;
+              modButton.innerHTML = "✏️";
+              td0.appendChild(modButton);
             }
-        }
-    });
-}
+          }
+        });
+      }
 
+      addGlobalClickListener();
+      // Fonction pour générer les fiches
+      function generateFiche(fiche, activate, fid) {
+        // Créer la section
+        const section = document.createElement("section");
+        section.id = `${fid}`;
+        section.className = "no-break";
 
-         addGlobalClickListener()        
-// Fonction pour générer les fiches
-function generateFiche(fiche, activate, fid) {
-    // Créer la section
-    const section = document.createElement('section');
-    section.id = `${fid}`;
-    section.className="no-break"
-
-    const h2 = document.createElement('h2');
+        const h2 = document.createElement("h2");
         h2.innerText = fiche.F_description;
         section.appendChild(h2);
-    // Parcourir les groupes
-    fiche.groupes.forEach(groupe => {
-        // Ajouter un titre pour le groupe
-        const h3 = document.createElement('h3');
-        h3.innerText = groupe.G_description;
-        section.appendChild(h3);
+        // Parcourir les groupes
+        fiche.groupes.forEach((groupe) => {
+          // Ajouter un titre pour le groupe
+          const h3 = document.createElement("h3");
+          h3.innerText = groupe.G_description;
+          section.appendChild(h3);
 
-        // Créer une table pour les questions
-        const table = document.createElement('table');
-        table.className="no-break"
+          // Créer une table pour les questions
+          const table = document.createElement("table");
+          table.className = "no-break";
 
-        // Ajouter l'en-tête de la table
-        const headerRow = document.createElement('tr');
-        const th0 = document.createElement('th');
-        th0.innerText = '🛠️';
-        th0.style.width = '1px';
-        th0.style.whiteSpace = 'nowrap';
-        th0.setAttribute('data-visual', "DM");
-        const th1 = document.createElement('th');
-        th1.innerText = 'Question Description';
+          // Ajouter l'en-tête de la table
+          const headerRow = document.createElement("tr");
+          const th0 = document.createElement("th");
+          th0.innerText = "🛠️";
+          th0.style.width = "1px";
+          th0.style.whiteSpace = "nowrap";
+          th0.setAttribute("data-visual", "DM");
+          const th1 = document.createElement("th");
+          th1.innerText = "Question Description";
 
-        const th2 = document.createElement('th');
-        th2.innerText = 'Response';
-        const th3 = document.createElement('th');
-        th3.innerText = 'Sas';
-        th3.setAttribute('data-visual', "DM");
-        const th4 = document.createElement('th');
-        th4.innerText = 'EditCheck';
-        th4.setAttribute('data-visual', "DM");
-        th4.className="no-print";
-        const th5 = document.createElement('th');
-        th5.innerText = 'Report';
-        th5.setAttribute('data-visual', "DM");
-        th5.className="no-print";
+          const th2 = document.createElement("th");
+          th2.innerText = "Response";
+          const th3 = document.createElement("th");
+          th3.innerText = "Sas";
+          th3.setAttribute("data-visual", "DM");
+          const th4 = document.createElement("th");
+          th4.innerText = "EditCheck";
+          th4.setAttribute("data-visual", "DM");
+          th4.className = "no-print";
+          const th5 = document.createElement("th");
+          // th5.innerText = 'Report';
+          // th5.setAttribute('data-visual', "DM");
+          // th5.className="no-print";
 
+          //   headerRow.appendChild(th0);
+          headerRow.appendChild(th1);
+          headerRow.appendChild(th2);
+          headerRow.appendChild(th3);
+          headerRow.appendChild(th4);
+          // headerRow.appendChild(th5);
 
+          table.appendChild(headerRow);
 
-        headerRow.appendChild(th0);
-        headerRow.appendChild(th1);
-        headerRow.appendChild(th2);
-        headerRow.appendChild(th3);
-        headerRow.appendChild(th4);
-        headerRow.appendChild(th5);
-
-        table.appendChild(headerRow);
-
-        // Ajouter les lignes pour chaque question
-        index=0
-        groupe.questions.forEach(question => {
-            index+=1
-            const row = document.createElement('tr');
+          // Ajouter les lignes pour chaque question
+          index = 0;
+          groupe.questions.forEach((question) => {
+            index += 1;
+            const row = document.createElement("tr");
 
             // Colonne pour l'outil
-            const td0 = document.createElement('td');
-            td0.setAttribute('data-visual', "DM");
-            td0.id = `td0${question.GI_key}`;
-            const editButton = document.createElement('button');
-            editButton.innerHTML = '✏️';
-            editButton.id = `But${question.GI_key}`;
-            editButton.className="no-print";
-            td0.appendChild(editButton);
+            // const td0 = document.createElement("td");
+            // td0.setAttribute("data-visual", "DM");
+            // td0.id = `td0${question.GI_key}`;
+            // const editButton = document.createElement("button");
+            // editButton.innerHTML = "✏️";
+            // editButton.id = `But${question.GI_key}`;
+            // editButton.className = "no-print";
+            // td0.appendChild(editButton);
 
             // Colonne pour la description
-            const td1 = document.createElement('td');
-            td1.innerHTML = question.I_description || 'N/A';
+            const td1 = document.createElement("td");
+            td1.innerHTML = question.I_description || "N/A";
             td1.id = `td1${question.GI_key}`;
-            td1.setAttribute('data-source', question.I_description);
-            td1.setAttribute('data-form', fiche.F_description);
-            td1.setAttribute('data-caption', question.I_caption);
-            td1.setAttribute('data-order', question.Item_Order);
-            
+            td1.setAttribute("data-source", question.I_description);
+            td1.setAttribute("data-form", fiche.F_description);
+            td1.setAttribute("data-caption", question.I_caption);
+            td1.setAttribute("data-order", question.Item_Order);
 
             // Colonne pour la réponse
-            const td2 = document.createElement('td');
-            td2.innerHTML = question.rep || 'N/A';
+            const td2 = document.createElement("td");
+            td2.innerHTML = question.rep || "N/A";
             td2.id = `td2${question.GI_key}`;
-            td2.setAttribute('data-source', question.rep);
+            td2.setAttribute("data-source", question.rep);
 
-            const td3 = document.createElement('td');
-            td3.innerHTML = question.i_SasName || 'N/A';
-            td3.setAttribute('data-visual', "DM");
+            const td3 = document.createElement("td");
+            td3.innerHTML = question.i_SasName || "N/A";
+            td3.setAttribute("data-visual", "DM");
             td3.id = `td3${question.GI_key}`;
-            td3.setAttribute('data-source', question.i_SasName);
+            td3.setAttribute("data-source", question.i_SasName);
 
-            const td4 = document.createElement('td'); // Crée une cellule de tableau
-            td4.setAttribute('data-visual', "DM");
-            td4.className="no-print";
+            const td4 = document.createElement("td"); // Crée une cellule de tableau
+            td4.setAttribute("data-visual", "DM");
+            td4.className = "no-print";
 
-            
             td4.innerHTML = question.Message; // Ajoute l'emoji au bouton
-            
-            const td5 = document.createElement('td'); // Crée une cellule de tableau
-            td5.classList.add('center-content'); // Ajoute la classe pour le centrage
 
-            td5.setAttribute('data-visual', "DM");
-            td5.className="no-print";
-            const issue = document.createElement('button'); // Crée un bouton
-            issue.innerHTML = "❗"; // Ajoute l'emoji au bouton
-            issue.id = "report-issue"; // Donne un ID au bouton
-            issue.setAttribute('data-fiche', fiche.F_description);
-            issue.setAttribute('data-question', question.I_description);
-            issue.setAttribute('data-SasName', question.i_SasName);
-            issue.addEventListener('click', () => {
-                const ficheDescription = event.target.getAttribute('data-fiche');
-                const questionDescription = event.target.getAttribute('data-question');
-                const SasName = event.target.getAttribute('data-SasName');
+            const td5 = document.createElement("td"); // Crée une cellule de tableau
+            td5.classList.add("center-content"); // Ajoute la classe pour le centrage
 
-                // Remplacez l'URL avec votre propre logique
-                title= ` Problème avec ${ficheDescription} SasName:${SasName}`;
-                description = `# Problème identifié sur : \n## fiche:${ficheDescription} \n### SasName:${SasName} \n\n question= ${questionDescription} \n\n détail :`;
+            // td5.setAttribute("data-visual", "DM");
+            // td5.className = "no-print";
+            // const issue = document.createElement("button"); // Crée un bouton
+            // issue.innerHTML = "❗"; // Ajoute l'emoji au bouton
+            // issue.id = "report-issue"; // Donne un ID au bouton
+            // issue.setAttribute("data-fiche", fiche.F_description);
+            // issue.setAttribute("data-question", question.I_description);
+            // issue.setAttribute("data-SasName", question.i_SasName);
+            // issue.addEventListener("click", () => {
+            //   const ficheDescription = event.target.getAttribute("data-fiche");
+            //   const questionDescription =
+            //     event.target.getAttribute("data-question");
+            //   const SasName = event.target.getAttribute("data-SasName");
 
-                const url = `https://github.com/Anmangin/XML_TM/issues/new?title=${encodeURIComponent(title)}&body=${encodeURIComponent(description)}&labels=bug`;
-                window.open(url, '_blank');
-            });
+            //   // Remplacez l'URL avec votre propre logique
+            //   title = ` Problème avec ${ficheDescription} SasName:${SasName}`;
+            //   description = `# Problème identifié sur : \n## fiche:${ficheDescription} \n### SasName:${SasName} \n\n question= ${questionDescription} \n\n détail :`;
 
-            td5.appendChild(issue); // Ajoute le bouton à la cellule
+            //   const url = `https://github.com/Anmangin/XML_TM/issues/new?title=${encodeURIComponent(
+            //     title
+            //   )}&body=${encodeURIComponent(description)}&labels=bug`;
+            //   window.open(url, "_blank");
+            // });
 
-            
+            // td5.appendChild(issue); // Ajoute le bouton à la cellule
+
             // Ajouter les colonnes à la ligne
-            
-            row.appendChild(td0);
+
+            // row.appendChild(td0);
             row.appendChild(td1);
             row.appendChild(td2);
             row.appendChild(td3);
             row.appendChild(td4);
-            row.appendChild(td5);
-
+            // row.appendChild(td5);
 
             // Ajouter la ligne au tableau
             table.appendChild(row);
-            const rowp = document.createElement('tr');
-rowp.style.position = "relative"; // Position de la ligne pour utiliser la position absolue de la cellule
-rowp.style.height = "0px"; // Hauteur de la ligne
-rowp.style.overflow = "hidden"; // Permet au contenu de dépasser la hauteur
-rowp.style.visibility = "hidden"; // Masque la ligne, mais pas son contenu
+            const rowp = document.createElement("tr");
+            rowp.style.position = "relative"; // Position de la ligne pour utiliser la position absolue de la cellule
+            rowp.style.height = "0px"; // Hauteur de la ligne
+            rowp.style.overflow = "hidden"; // Permet au contenu de dépasser la hauteur
+            rowp.style.visibility = "hidden"; // Masque la ligne, mais pas son contenu
+          });
 
-          
+          // Ajouter une ligne de séparation "+" après chaque ligne sauf la dernière
+
+          // Ajouter la table à la section
+          section.appendChild(table);
         });
 
-            // Ajouter une ligne de séparation "+" après chaque ligne sauf la dernière
-   
+        // Ajouter la section au contenu principal
+        mainContent.appendChild(section);
+      }
 
-        // Ajouter la table à la section
-        section.appendChild(table);
-    });
+      // Function to generate all fiches for a visit
+      function generateFiches(visite, vid) {
+        const h1 = document.createElement("h1");
+        h1.innerText = "Visite " + visite.V_description;
+        h1.id = `${vid}`;
+        mainContent.appendChild(h1);
 
-    // Ajouter la section au contenu principal
-    mainContent.appendChild(section);
-}
+        n = 0;
+        activate = true;
+        Fidex = 0;
 
-
-        // Function to generate all fiches for a visit
-        function generateFiches(visite,vid) {
-
-            const h1 = document.createElement('h1');
-            h1.innerText = "Visite " + visite.V_description;
-            h1.id = `${vid}`
-            mainContent.appendChild(h1);
-     
-            n=0
-            activate=true;
-            Fidex=0
-
-            visite.fiches.forEach(fiche => {               
-                generateFiche(fiche,activate,`${vid}f${Fidex}`); // Use the same function to generate each fiche in the visit
-                Fidex += 1;
-                activate=false;
-
-
-                
-            });
-      
-        }
-
-    
-
+        visite.fiches.forEach((fiche) => {
+          generateFiche(fiche, activate, `${vid}f${Fidex}`); // Use the same function to generate each fiche in the visit
+          Fidex += 1;
+          activate = false;
+        });
+      }
     </script>
 
-<script>
-   
-    // Récupère le bouton et ajoute un événement de clic
-    const toggleButton = document.getElementById('toggle-button');
+    <script>
+      // Récupère le bouton et ajoute un événement de clic
+      const toggleButton = document.getElementById("toggle-button");
 
-    toggleButton.addEventListener('click', () => {
-        const currentState = toggleButton.getAttribute('data-state');
+      toggleButton.addEventListener("click", () => {
+        const currentState = toggleButton.getAttribute("data-state");
         let newState, buttonText;
 
         // Basculer entre les deux états
         if (currentState === "DM") {
-            newState = "Investigateur";
-            buttonText = "Investigateur";
-            toggleButton.classList.remove('pressed');
-            toggleButton.classList.add('released');
+          newState = "Investigateur";
+          buttonText = "Investigateur";
+          toggleButton.classList.remove("pressed");
+          toggleButton.classList.add("released");
         } else {
-            newState = "DM";
-            buttonText = "DM";
-            toggleButton.classList.remove('released');
-            toggleButton.classList.add('pressed');
+          newState = "DM";
+          buttonText = "DM";
+          toggleButton.classList.remove("released");
+          toggleButton.classList.add("pressed");
         }
 
         // Met à jour l'état du bouton
-        toggleButton.setAttribute('data-state', newState);
+        toggleButton.setAttribute("data-state", newState);
         toggleButton.innerText = buttonText;
 
         // Afficher/Masquer les éléments en fonction de l'état
-        document.querySelectorAll('[data-visual]').forEach(el => {
-            if (el.getAttribute('data-visual') === newState) {
-                el.style.display = "table-cell";
-            } else {
-                el.style.display = "none";
-            }
+        document.querySelectorAll("[data-visual]").forEach((el) => {
+          if (el.getAttribute("data-visual") === newState) {
+            el.style.display = "table-cell";
+          } else {
+            el.style.display = "none";
+          }
         });
-    });
+      });
 
-    // Afficher initialement les éléments de l'état par défaut (DM)
-    document.querySelectorAll('[data-visual="DM"]').forEach(el => {
+      // Afficher initialement les éléments de l'état par défaut (DM)
+      document.querySelectorAll('[data-visual="DM"]').forEach((el) => {
         el.style.display = "table-cell";
-    });
+      });
 
+      let h1list = document.getElementsByTagName("h1");
+      let sectionlist = document.getElementsByTagName("section");
 
+      for (let section of sectionlist) {
+        section.classList.remove("hidden");
+        section.classList.add("show");
+      }
 
+      for (let title of h1list) {
+        title.classList.remove("hidden");
+        title.classList.add("show");
+      }
 
-        let h1list = document.getElementsByTagName('h1');
-        let sectionlist = document.getElementsByTagName('section');
+      // Fonction pour afficher les changements dans la section du tableau
 
-        for (let section of sectionlist) {
-                section.classList.remove('hidden');
-                section.classList.add('show');
-        }
+      function updateChangeLog() {
+        const changeList = document.getElementById("change-list");
+        changeList.innerHTML = ""; // Réinitialiser le corps du tableau avant de le remplir
 
-        for (let title of h1list) {
-            title.classList.remove('hidden');
-            title.classList.add('show');
-        }
+        // Vérifier s'il y a des modifications enregistrées
+        if (Object.keys(exportData).length > 0) {
+          // Trier l'objet exportData par la propriété dataorder
+          const sortedEntries = Object.entries(exportData).sort(
+            ([, a], [, b]) => a.dataorder - b.dataorder
+          );
 
-// Fonction pour afficher les changements dans la section du tableau
-
-
-function updateChangeLog() {
-    const changeList = document.getElementById('change-list');
-    changeList.innerHTML = ''; // Réinitialiser le corps du tableau avant de le remplir
-
-    // Vérifier s'il y a des modifications enregistrées
-    if (Object.keys(exportData).length > 0) {
-        // Trier l'objet exportData par la propriété dataorder
-        const sortedEntries = Object.entries(exportData).sort(([, a], [, b]) => a.dataorder - b.dataorder);
-        
-        for (const [formKey, formValue] of sortedEntries) {
+          for (const [formKey, formValue] of sortedEntries) {
             for (const [sourceKey, value] of Object.entries(formValue)) {
-                const row = document.createElement('tr');
-                row.innerHTML = `
+              const row = document.createElement("tr");
+              row.innerHTML = `
                     <td>${formKey}</td>
                     <td>${sourceKey}</td>
                     <td>${value.description}</td>
                     <td>${value.responseType}</td>
                     <td>${value.sasName}</td>
                 `;
-                changeList.appendChild(row);
+              changeList.appendChild(row);
             }
-        }
-    } else {
-        const row = document.createElement('tr');
-        row.innerHTML = `
+          }
+        } else {
+          const row = document.createElement("tr");
+          row.innerHTML = `
             <td colspan="5" style="text-align: center;">Aucun changement enregistré.</td>
         `;
-        changeList.appendChild(row);
-    }
-}
-
-document.getElementById('validOnlyCheckbox').addEventListener('change', function () {
-    const showOnlyValid = this.checked;
-    const detailsBlocks = document.querySelectorAll('details');
-
-    detailsBlocks.forEach(detail => {
-      const contentText = detail.innerHTML.toLowerCase(); // tout le contenu
-      const hasValid = contentText.includes('valid:');
-
-      if (showOnlyValid) {
-        // on garde que ceux qui contiennent "Valid:"
-        detail.style.display = hasValid ? '' : 'none';
-      } else {
-        // on réaffiche tout
-        detail.style.display = '';
+          changeList.appendChild(row);
+        }
       }
-    });
-  });
 
-</script>
+      document
+        .getElementById("validOnlyCheckbox")
+        .addEventListener("change", function () {
+          const showOnlyValid = this.checked;
+          const detailsBlocks = document.querySelectorAll("details");
 
+          detailsBlocks.forEach((detail) => {
+            const contentText = detail.innerHTML.toLowerCase(); // tout le contenu
+            const hasValid = contentText.includes("valid:");
 
-
-</body>
-
+            if (showOnlyValid) {
+              // on garde que ceux qui contiennent "Valid:"
+              detail.style.display = hasValid ? "" : "none";
+            } else {
+              // on réaffiche tout
+              detail.style.display = "";
+            }
+          });
+        });
+    </script>
+  </body>
 </html>

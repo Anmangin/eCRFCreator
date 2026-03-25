@@ -3,7 +3,178 @@ import json
 import xml.etree.ElementTree as ET
 import xlsxwriter
 from bs4 import BeautifulSoup
+from docx.shared import Cm
 
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.enum.table import WD_CELL_VERTICAL_ALIGNMENT
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
+from docx.shared import Pt
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
+from docx.shared import RGBColor
+from bs4 import BeautifulSoup
+
+i_couleur=0
+def add_cover_page(document):
+    from datetime import datetime
+    from docx.enum.text import WD_ALIGN_PARAGRAPH
+    from docx.shared import Pt, RGBColor
+
+
+    # 🎯 Grand espace haut (respiration)
+    for _ in range(5):
+        document.add_paragraph("")
+
+    # 🧾 Titre principal
+    p = document.add_paragraph()
+    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    run = p.add_run("MAQUETTE DE CRF")
+    run.bold = True
+    run.font.size = Pt(28)
+
+    # 📚 Sous-titre étude
+    p = document.add_paragraph()
+    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    run = p.add_run("DE L'ÉTUDE [...]")
+    run.bold = True
+    run.font.size = Pt(20)
+    run.font.color.rgb = RGBColor(80, 80, 80)
+
+    # 📏 Espace
+    for _ in range(3):
+        document.add_paragraph("")
+
+    # 🧬 Ligne séparation soft
+    p = document.add_paragraph()
+    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    run = p.add_run("────────────────────────────")
+    run.font.color.rgb = RGBColor(150, 150, 150)
+
+    # 📅 Date génération
+    p = document.add_paragraph()
+    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    run = p.add_run(f"Généré le {datetime.now().strftime('%d/%m/%Y')}")
+    run.italic = True
+    run.font.size = Pt(10)
+
+    # 🏢 Signature (optionnel mais pro)
+    p = document.add_paragraph()
+    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    run = p.add_run("Document généré automatiquement")
+    run.font.size = Pt(9)
+    run.font.color.rgb = RGBColor(120, 120, 120)
+
+
+def add_summary_table(graph, document, head):
+    document.add_page_break()
+    document.add_paragraph("Résumé du CRF", style='Heading 1')
+
+    table = document.add_table(rows=1, cols=2)
+    table.width = Cm(20)
+
+    table.style = 'Light Grid Accent 1'
+
+    hdr_cells = table.rows[0].cells
+    hdr_cells[0].text = "Niveau"
+    hdr_cells[0].width = Cm(1)
+    hdr_cells[1].text = "Nom"
+    hdr_cells[1].width = Cm(19)
+
+    niveau_map = {
+        "ProTrial": ("Trial", 0),
+        "ProSite": ("Site", 1),
+        "ProPatient": ("Patient", 2),
+        "ProVisit": ("Visit", 3),
+        "ProForm": ("", 4)  # 👉 vide pour Form
+    }
+
+    def recurse(node_id):
+        node = graph[node_id]
+        tag = node.get('tag', '')
+        children = node.get('child', [])
+
+        if tag not in niveau_map:
+            for child_id, _ in children:
+                recurse(child_id)
+            return
+
+        desc = node.get('Description') or node.get('Caption') or ""
+        desc = BeautifulSoup(desc, "html.parser").get_text().strip()
+
+        # 👉 repeat
+        info = ""
+        try:
+            if int(node.get('MaxOccurance', 0)) > 1:
+                info = "⟳"
+        except:
+            pass
+
+        # 👉 concat desc + info
+        if info:
+            desc = f"{desc} - {info}"
+
+        niveau_label, level = niveau_map[tag]
+
+        # 👉 indentation avec tabulation
+        indent = "  " * level
+
+        row_cells = table.add_row().cells
+        row_cells[0].text = niveau_label
+        hdr_cells[0].width = Cm(2)
+        row_cells[1].text = indent + desc
+        hdr_cells[1].width = Cm(18)
+
+        # 🎨 style léger mais efficace
+        if tag == "ProVisit":
+            for cell in row_cells:
+                cell.paragraphs[0].runs[0].bold = True
+
+        if tag == "ProForm":
+            row_cells[1].paragraphs[0].runs[0].italic = True
+
+        for child_id, _ in sorted(children, key=lambda x: x[1]):
+            recurse(child_id)
+
+    recurse(head)
+
+
+def set_table_borders(table):
+    tbl = table._tbl
+    tblPr = tbl.tblPr
+
+    borders = OxmlElement('w:tblBorders')
+
+    for border_name in ('top', 'left', 'bottom', 'right', 'insideH', 'insideV'):
+        border = OxmlElement(f'w:{border_name}')
+        border.set(qn('w:val'), 'single')   # type de ligne
+        border.set(qn('w:sz'), '6')         # épaisseur (6 = fin)
+        border.set(qn('w:space'), '0')
+        border.set(qn('w:color'), '000000') # noir
+        borders.append(border)
+
+    tblPr.append(borders)
+
+def set_cell_background(cell, color="D9EAF7"):  # bleu clair sympa
+    tc = cell._tc
+    tcPr = tc.get_or_add_tcPr()
+    
+    shd = OxmlElement('w:shd')
+    shd.set(qn('w:fill'), color)
+    
+    tcPr.append(shd)
+
+
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
+
+def prevent_row_split(row):
+    tr = row._tr
+    trPr = tr.get_or_add_trPr()
+
+    cantSplit = OxmlElement('w:cantSplit')
+    trPr.append(cantSplit)
 
 
 def remove_details_tags(text):
@@ -162,6 +333,7 @@ def check_data_type(number):
     elif number =="13":return "Label"
     elif number =="16":return "Textbox with MedDRA"
     elif number =="18":return "Timer"
+    elif number =="21":return "Combo Box Dynamic"
     return number
 
 
@@ -323,6 +495,10 @@ def get_JSONLIGNE(JSON_EXPORT, V_description, F_description, G_description, GI_k
     
     return JSON_EXPORT
 
+def find_root(graph):
+    for node_id, node in graph.items():
+        if not node['parent']:  # pas de parent
+            return node_id
 
 def create_graph(data):
     dictionnary = dict()
@@ -335,7 +511,13 @@ def create_graph(data):
                 dictionnary[guid] = dict()
                 dictionnary[guid]['child'] = list()
                 dictionnary[guid]['parent'] = list()
-                dictionnary[guid]['Caption'] = elem.find('Caption').text
+                caption = elem.find('Caption').text if elem.find('Caption') is not None else ""
+                value_elem = elem.find('Value')
+
+                if value_elem is not None and value_elem.text:
+                    dictionnary[guid]['Caption'] = f"{value_elem.text} - {caption}"
+                else:
+                    dictionnary[guid]['Caption'] = caption
                 dictionnary[guid]['tag'] = elem.tag
             except AttributeError:
                 pass
@@ -517,26 +699,77 @@ def print_doc_xml(xmlFile, docFile, head=None):
     # Find the head
     if head == None:
         for k, v in graph.items():
-            if v['tag'] == 'ProTrial':
+            if v['tag'] == 'ProPatient':
                 head = k
                 break
     from docx import Document
     document = Document()
-    internal_func_doc(graph, document, head=head, lvl=0, buffer=list())
-    document.save(docFile)
+    # document.add_heading("SUMMARY", level=1)
+    # internal_func_doc(graph, document, head=head, lvl=2, unique=False, summary=True)
+    # document.add_page_break()
+    # document.add_heading("CRF", level=1)
 
 
-def internal_func_doc(graph, documentName, head=None, lvl=0, buffer=list(), maxi=False):
+
+
+    # # Créer un style basé sur Titre1
+    styles = document.styles
+    if 'FormDescription' not in styles:
+        style = styles.add_style('FormDescription', 1)  # 1 = paragraph style
+        style.base_style = styles['Heading 1']          # Hérite de Heading 1
+        font = style.font
+        font.name = 'Arial'                             # Nom de police
+        font.size = Pt(16)
+        font.bold = True
+        font.color.rgb = RGBColor(0, 51, 102)           # Bleu foncé
+
+        head = find_root(graph)
+
+        add_cover_page(document)
+        add_summary_table(graph, document, head)
+        document.add_page_break()
+        internal_func_doc(graph, document, head=head, lvl=2, buffer=list())
+        document.save(docFile)
+
+from docx.shared import Pt
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
+
+def set_cell_background(cell, color="D9EAF7"):
+    """Applique un fond coloré à une cellule Word."""
+    tc = cell._tc
+    tcPr = tc.get_or_add_tcPr()
+    shd = OxmlElement('w:shd')
+    shd.set(qn('w:fill'), color)
+    tcPr.append(shd)
+
+
+
+
+
+def internal_func_doc(graph, documentName, head=None, lvl=0, buffer=list(), maxi=False, unique=True,uniqueList=list(), summary=False):
     lns = graph[head]['child']
     tag = graph[head]['tag']
+    if tag == 'ProVisit' and not summary:
+        documentName.add_page_break()
+    if summary and tag not in ["ProTrial", "ProSite", "ProPatient", "ProVisit", "ProForm"]:
+        return
     try:
         desc = graph[head]['Description'].strip()
         soup = BeautifulSoup(desc, "html.parser")
         desc = soup.get_text()
+        if unique and tag in ["ProTrial", "ProSite", "ProPatient", "ProVisit", "ProForm"]:
+            if head in uniqueList: return
+            uniqueList.append(head)
         try:
             typ = check_data_type(graph[head]['type'])
         except:
             typ = ''
+        try:
+            hidden = graph[head]['Hidden']
+        except:
+            hidden = False
         try:
             sasNam = graph[head]['SasName']
         except:
@@ -548,26 +781,33 @@ def internal_func_doc(graph, documentName, head=None, lvl=0, buffer=list(), maxi
         except:
             repeat = ""
         if len(desc) > 0:
-            #print(desc, typ, sep="\t")
             if len(typ) == 0:
                 try:
                     documentName.add_heading(desc, level=lvl)
                 except ValueError:
                     documentName.add_heading(desc, level=9)
             else:
-                buffer = (desc, typ, list())
-    except:
-        #print("\t", graph[head]['Caption'])
+                buffer = (desc, typ, list(), hidden)
+    except KeyError:
         buffer[2].append(graph[head]['Caption'])
     if len(buffer) > 0 and len(lns) == 0 and (maxi or tag != 'ProCodeListItem'):
-        table = documentName.add_table(rows=1, cols=3)
+        table = documentName.add_table(rows=1, cols=2)
+        if buffer[3] and buffer[3] == "True":
+            table.style = 'Medium Shading 1'
+        else:
+            table.style = 'Light Grid Accent 1'
         hdr_cells = table.rows[0].cells
+        hdr_cells[0].width = Cm(14)
         hdr_cells[0].text = buffer[0].replace("\\r\\n", "\n")
-        hdr_cells[1].text = buffer[1]
         codeList = "\n".join(buffer[2])
+        hdr_cells[1].width = Cm(6)
         if len(buffer[2]) > 10:
             codeList = "\n".join(buffer[2][0:4] + ['...'] + buffer[2][-4:-1])
-        hdr_cells[2].text = codeList
+        if len(codeList)>0:
+            para = hdr_cells[1].paragraphs[0].add_run(codeList)
+            para.font.color.rgb = RGBColor(255, 0, 0)
+        else:
+            hdr_cells[1].text = buffer[1]
         buffer = list()
     ls = sorted(lns, key = lambda e:e[1])
     lvl = lvl + 1
@@ -577,7 +817,7 @@ def internal_func_doc(graph, documentName, head=None, lvl=0, buffer=list(), maxi
             maxi = True
         else:
             maxi = False
-        internal_func_doc(graph, documentName, e[0], lvl, buffer, maxi)
+        internal_func_doc(graph, documentName, e[0], lvl, buffer, maxi, unique, uniqueList, summary=summary)
 
 
 
@@ -585,3 +825,95 @@ def find_parentals(graph, id):
     for e in graph[id]['parents']:
         print(e)
         find_parentals(graph, e)
+
+# def internal_func_doc(graph, documentName, head=None, lvl=0, buffer=list(), maxi=False):
+#     lns = graph[head]['child']
+#     tag = graph[head]['tag']
+    
+#     try:
+#         desc = graph[head]['Description'].strip()
+#         soup = BeautifulSoup(desc, "html.parser")
+#         desc = soup.get_text()
+        
+#         try:
+#             typ = check_data_type(graph[head]['type'])
+#         except:
+#             typ = ''
+#         try:
+#             sasNam = graph[head]['SasName']
+#         except:
+#             sasNam = ''
+#         try:
+#             repeat = graph[head]['MaxOccurance']
+#             if int(repeat) > 1:
+#                 desc += " 🔁:" + repeat
+#         except:
+#             repeat = ""
+        
+#         if len(desc) > 0:
+#             # Si c'est une fiche, on centre le titre
+#             if tag == 'ProForm':
+#                 documentName.add_page_break()
+#                 para = documentName.add_paragraph(desc, style='FormDescription')
+
+#                 para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+#                 run = para.runs[0]
+#                 run.bold = True
+#                 run.font.size = Pt(16)
+#             # Si c'est un groupe, on stylise le titre
+#             elif tag == 'ProGroup':
+#                 para = documentName.add_paragraph(desc)
+#                 para.alignment = WD_ALIGN_PARAGRAPH.LEFT
+#                 run = para.runs[0]
+#                 run.bold = True
+#                 run.font.size = Pt(12)
+#                 run.font.color.rgb = RGBColor(0, 51, 102)  # bleu foncé
+#             else:
+#                 buffer = (desc, typ, list())
+#     except:
+#         buffer[2].append(graph[head]['Caption'])
+    
+#     # Si on est au bout d'une branche et qu'on doit écrire le tableau
+#     if len(buffer) > 0 and len(lns) == 0 and (maxi or tag != 'ProCodeListItem'):
+#         table = documentName.add_table(rows=1, cols=2)
+#         set_table_borders(table)
+#         table.width = Cm(20)
+#         row = table.rows[0]
+#         prevent_row_split(row)
+#         hdr_cells = table.rows[0].cells
+#         hdr_cells[0].text = buffer[0].replace("\\r\\n", "\n")
+#         hdr_cells[0].width = Cm(13)
+#         codeList = "\n".join(buffer[2]) if buffer[2] else ""
+#         if codeList and len(buffer[2]) > 10:
+#             codeList = "\n".join(buffer[2][0:4] + ['...'] + buffer[2][-4:-1])
+#         # Version correcte en Python
+#         if codeList:
+#             display_value = codeList
+#         elif buffer[1] == 'Date':
+#             display_value = "📅 DD/MM/YYYY"
+#         else:
+#             display_value = buffer[1]
+#         hdr_cells[1].text = display_value
+#         hdr_cells[1].width = Cm(5)
+#         hdr_cells[1].alignment = WD_ALIGN_PARAGRAPH.RIGHT
+
+#         cell = hdr_cells[1]
+#         cell.text = display_value
+#         cell.width = Cm(5)
+
+#         # ⚡ alignement sur le paragraphe interne
+#         cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.RIGHT
+#         for i, row in enumerate(table.rows):
+#             global i_couleur 
+#             i_couleur+=1
+#             color = "D9EAF7" if i_couleur % 2 == 0 else "FFFFFF"  # bleu clair / blanc
+#             for cell in row.cells:
+#                 set_cell_background(cell, color=color)
+
+#         buffer = list()
+    
+#     # Parcours récursif
+#     ls = sorted(lns, key=lambda e: e[1])
+#     for i, e in enumerate(ls):
+#         internal_func_doc(graph, documentName, e[0], lvl + 1, buffer, maxi=(i == len(ls) - 1))
+    
