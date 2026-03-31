@@ -709,9 +709,6 @@ def print_doc_xml(xmlFile, docFile, head=None):
     # document.add_page_break()
     # document.add_heading("CRF", level=1)
 
-
-
-
     # # Créer un style basé sur Titre1
     styles = document.styles
     if 'FormDescription' not in styles:
@@ -723,11 +720,19 @@ def print_doc_xml(xmlFile, docFile, head=None):
         font.bold = True
         font.color.rgb = RGBColor(0, 51, 102)           # Bleu foncé
 
-        head = find_root(graph)
+        # head = find_root(graph) # More than one node without parent
 
         add_cover_page(document)
         add_summary_table(graph, document, head)
         document.add_page_break()
+        # Ajoute la fiche PAT au début du document 
+        PAT = None
+        for k, v in graph.items():
+            if v['tag'] == 'ProForm' and v['Caption'] == "PAT":
+                PAT = k
+                break
+        internal_func_doc(graph, document, head=PAT, lvl=2, buffer=list())
+        # Ajoute les fiches descendants de head
         internal_func_doc(graph, document, head=head, lvl=2, buffer=list())
         document.save(docFile)
 
